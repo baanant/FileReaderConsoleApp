@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using ProductFileReader.Common.Entities;
@@ -17,6 +19,8 @@ namespace ProductFileReader.Common.Commands
             try
             {
                 var fileDataColumns = ReadFileData(file);
+                var productData = DataToObjects(fileDataColumns);
+                return string.Empty;
             }
             catch (InputException ex)
             {
@@ -28,43 +32,47 @@ namespace ProductFileReader.Common.Commands
             }
         }
 
+        private static List<ProductData> DataToObjects(List<FileDataColumn> dataCols)
+        {
+            var productDataProperties = typeof (ProductData).GetProperties();
+            foreach (var prop in productDataProperties)
+            {
+                var propertyType = prop.PropertyType;
+                var displayName = prop.GetCustomAttribute<DisplayAttribute>().Name;
+
+            }
+            return null;
+        }
+
         private static List<FileDataColumn> ReadFileData(string fileName)
         {
-            // Open the text file using a stream reader.
             using (StreamReader sr = new StreamReader(fileName))
             {
-                // Read the stream to a string, and write the string to the console.
                 string line = string.Empty;
                 var headerRow = true;
                 var data = new List<FileDataColumn>();
                 while (!sr.EndOfStream)
                 {
                     line = sr.ReadLine();
-                    if (line.StartsWith("#") || String.IsNullOrEmpty(line)) continue;
+                    if (line != null && (line.StartsWith("#") || string.IsNullOrEmpty(line))) continue;
+                    var values = line.Split('\t').ToList();
                     if (headerRow)
                     {
-                        var headers = line.Split('\t').ToList();
-                        headers.ForEach(h =>
+                        values.ForEach(h =>
                         {
-                            if (!String.IsNullOrEmpty(h)) data.Add(new FileDataColumn(h));
+                            if (!string.IsNullOrEmpty(h)) data.Add(new FileDataColumn(h));
                         });
                         headerRow = false;
                     }
                     else
                     {
-                        var values = line.Split('\t').ToList();
                         for (var i = 0; i < values.Count(); i++)
                         {
-                            if (values[i] == "NULL")
-                                data[i].Values.Add(string.Empty);
-                            else
-                                data[i].Values.Add(values[i]);
+                            data[i].Values.Add(values[i].Contains("NULL") ? string.Empty : values[i]);
                         }
                     }
-
                 }
-
-                return line;
+                return data;
             }
         } 
 
