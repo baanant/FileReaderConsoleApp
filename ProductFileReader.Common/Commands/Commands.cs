@@ -18,8 +18,9 @@ namespace ProductFileReader.Common.Commands
         {
             try
             {
-                var fileDataColumns = ReadFileData(file);
-                var productData = DataToObjects(fileDataColumns);
+                int noOfValueRows = 0;
+                var fileDataColumns = ReadFileData(file, out noOfValueRows);
+                var productData = DataToObjects(fileDataColumns, noOfValueRows);
                 return string.Empty;
             }
             catch (InputException ex)
@@ -32,20 +33,54 @@ namespace ProductFileReader.Common.Commands
             }
         }
 
-        private static List<ProductData> DataToObjects(List<FileDataColumn> dataCols)
+        private static List<ProductData> DataToObjects(List<FileDataColumn> dataCols, int noOfRows)
         {
+            var result = new List<ProductData>();
             var productDataProperties = typeof (ProductData).GetProperties();
-            foreach (var prop in productDataProperties)
+            for (var r = 0; r < noOfRows; r++)
             {
-                var propertyType = prop.PropertyType;
-                var displayName = prop.GetCustomAttribute<DisplayAttribute>().Name;
+                var prodData = new ProductData();
+                for (var i = 0; i < productDataProperties.Count(); i++)
+                {
+                    var prop = productDataProperties[i];
+                    var propertyType = prop.PropertyType;
+                    var displayName = prop.GetCustomAttribute<DisplayAttribute>().Name;
+                    var dataCol = dataCols.FirstOrDefault(dc => dc.HeaderTitle == displayName);
+                    var valueAsString = dataCol == null ? string.Empty : dataCol.Values[r];
+                    var valueAsObject = ParseDataValue(propertyType, valueAsString);
+                }
 
             }
             return null;
         }
 
-        private static List<FileDataColumn> ReadFileData(string fileName)
+
+        private static object ParseDataValue(Type propertyType, string valueAsString)
         {
+            object result = null;
+            if (propertyType == typeof(string))
+            {
+                result = valueAsString;
+            }
+            else if (propertyType == typeof(Int32))
+            {
+                int numberValue;
+                if (int.TryParse(valueAsString, out numberValue))
+                {
+                    result = numberValue;
+                }
+                else
+                {
+                    throw new InputException("ADD");
+                }
+            }
+            
+            return result;
+        }
+
+        private static List<FileDataColumn> ReadFileData(string fileName, out int noOfRows)
+        {
+            noOfRows = 0;
             using (StreamReader sr = new StreamReader(fileName))
             {
                 string line = string.Empty;
@@ -66,6 +101,7 @@ namespace ProductFileReader.Common.Commands
                     }
                     else
                     {
+                        noOfRows++;
                         for (var i = 0; i < values.Count(); i++)
                         {
                             data[i].Values.Add(values[i].Contains("NULL") ? string.Empty : values[i]);
