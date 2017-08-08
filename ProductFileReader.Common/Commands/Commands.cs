@@ -45,9 +45,40 @@ namespace ProductFileReader.Common.Commands
                     var prop = productDataProperties[i];
                     var propertyType = prop.PropertyType;
                     var displayName = prop.GetCustomAttribute<DisplayAttribute>().Name;
+                    
                     var dataCol = dataCols.FirstOrDefault(dc => dc.HeaderTitle == displayName);
                     var valueAsString = dataCol == null ? string.Empty : dataCol.Values[r];
-                    var valueAsObject = ParseDataValue(propertyType, valueAsString);
+                    try
+                    {
+                        var valueAsObject = 
+                            propertyType.IsGenericType 
+                            && propertyType.GetGenericTypeDefinition() == typeof(Nullable<>) 
+                            && valueAsString == Constants.InputData.NullValue ? null : ParseStringValue(propertyType, valueAsString);
+
+                        //if (propertyType.IsGenericType && propertyType.GetGenericTypeDefinition() == typeof(Nullable<>))
+                        //{
+                        //    // Check for null or empty string value.
+                        //    if (propertyValue == null || string.IsNullOrWhiteSpace(propertyValue.ToString()))
+                        //    {
+                        //        propertyDetail.SetValue(obj, null);
+                        //        return;
+                        //    }
+                        //    else
+                        //    {
+                        //        dataType = propertyType.GetGenericArguments()[0];
+                        //    }
+                        //}
+
+                        //propertyValue = Convert.ChangeType(propertyValue, propertyType);
+
+                        //propertyDetail.SetValue(obj, propertyValue);
+
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new InputException(string.Format(ex.Message, r+1));
+                    }
+                    
                 }
 
             }
@@ -55,37 +86,50 @@ namespace ProductFileReader.Common.Commands
         }
 
 
-        private static object ParseDataValue(Type propertyType, string valueAsString)
+        private static object ParseStringValue(Type propertyType, string valueAsString)
         {
-            object result = null;
             if (propertyType == typeof(string))
             {
-                result = valueAsString;
+                return valueAsString;
             }
             else if (propertyType == typeof(Int32))
             {
                 int numberValue;
                 if (int.TryParse(valueAsString, out numberValue))
                 {
-                    result = numberValue;
+                    return numberValue;
                 }
-                else
-                {
-                    throw new InputException("ADD");
-                }
+                throw new Exception(string.Format(Constants.ErrorMessages.InvalidDataValue, valueAsString, propertyType));
             }
-            
-            return result;
+            else if (propertyType == typeof (decimal?))
+            {
+                decimal decimalValue;
+                if (decimal.TryParse(valueAsString, out decimalValue))
+                {
+                    return decimalValue;
+                }
+                throw new Exception(string.Format(Constants.ErrorMessages.InvalidDataValue, valueAsString, propertyType));
+            }
+            else if (propertyType == typeof (bool))
+            {
+                bool boolValue;
+                if (bool.TryParse(valueAsString, out boolValue))
+                {
+                    return boolValue;
+                }
+                throw new Exception(string.Format(Constants.ErrorMessages.InvalidDataValue, valueAsString, propertyType));
+            }
+            return null;
         }
 
         private static List<FileDataColumn> ReadFileData(string fileName, out int noOfRows)
         {
             noOfRows = 0;
+            var data = new List<FileDataColumn>();
             using (StreamReader sr = new StreamReader(fileName))
             {
-                string line = string.Empty;
+                var line = string.Empty;
                 var headerRow = true;
-                var data = new List<FileDataColumn>();
                 while (!sr.EndOfStream)
                 {
                     line = sr.ReadLine();
@@ -104,13 +148,27 @@ namespace ProductFileReader.Common.Commands
                         noOfRows++;
                         for (var i = 0; i < values.Count(); i++)
                         {
-                            data[i].Values.Add(values[i].Contains("NULL") ? string.Empty : values[i]);
+                            data[i].Values.Add(values[i]);
                         }
                     }
                 }
-                return data;
             }
+
+            //ToDo: Get more descriptive error message here, with the row number.
+            if(!data.HasSameNumberOfValues()) throw new InputException(Constants.ErrorMessages.InvalidInputFileData);
+    
+            return data;
+        }
+
+
+        
+        private static bool HasSameNumberOfValues(this IEnumerable<FileDataColumn> data)
+        {
+            if (data == null || data.First().Values == null) return false;
+            var firstCount = data.First().Values.Count();
+            return data.All(dc => dc.Values.Count() == firstCount);
         } 
 
+        
     }
 }

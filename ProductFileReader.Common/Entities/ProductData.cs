@@ -26,7 +26,7 @@ namespace ProductFileReader.Common.Entities
         [Display(Name = "Responsible")]
         public string Responsible { get; set; }
 
-        [Display(Name = "SavingsAmount")]
+        [Display(Name = "Savings amount")]
         public decimal? SavingsAmount { get; set; }
 
         [Display(Name ="Currency")]
