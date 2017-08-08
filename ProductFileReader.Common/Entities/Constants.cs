@@ -8,6 +8,11 @@
             public const string ConsolePrompt               = "command > ";
         }
 
+        public struct Formats
+        {
+            public const string DateTimeFormat              = "yyyy-MM-dd hh:mm:ss.zzz";
+        }
+
         public struct RegexPatterns
         {
             public const string ArgumentPattern             = "<(.*?)>";

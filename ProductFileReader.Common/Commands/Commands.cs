@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -33,10 +34,10 @@ namespace ProductFileReader.Common.Commands
             }
         }
 
-        private static List<ProductData> DataToObjects(List<FileDataColumn> dataCols, int noOfRows)
+        private static IEnumerable<ProductData> DataToObjects(List<FileDataColumn> dataCols, int noOfRows)
         {
             var result = new List<ProductData>();
-            var productDataProperties = typeof (ProductData).GetProperties();
+            var productDataProperties = typeof (ProductData).GetProperties(BindingFlags.Public | BindingFlags.Instance);
             for (var r = 0; r < noOfRows; r++)
             {
                 var prodData = new ProductData();
@@ -51,28 +52,13 @@ namespace ProductFileReader.Common.Commands
                     try
                     {
                         var valueAsObject = 
-                            propertyType.IsGenericType 
-                            && propertyType.GetGenericTypeDefinition() == typeof(Nullable<>) 
-                            && valueAsString == Constants.InputData.NullValue ? null : ParseStringValue(propertyType, valueAsString);
-
-                        //if (propertyType.IsGenericType && propertyType.GetGenericTypeDefinition() == typeof(Nullable<>))
-                        //{
-                        //    // Check for null or empty string value.
-                        //    if (propertyValue == null || string.IsNullOrWhiteSpace(propertyValue.ToString()))
-                        //    {
-                        //        propertyDetail.SetValue(obj, null);
-                        //        return;
-                        //    }
-                        //    else
-                        //    {
-                        //        dataType = propertyType.GetGenericArguments()[0];
-                        //    }
-                        //}
-
-                        //propertyValue = Convert.ChangeType(propertyValue, propertyType);
-
-                        //propertyDetail.SetValue(obj, propertyValue);
-
+                            (propertyType.IsGenericType && propertyType.GetGenericTypeDefinition() == typeof(Nullable<>) || (propertyType == typeof(string))) 
+                            && valueAsString == Constants.InputData.NullValue 
+                            ? null : ParseStringValue(propertyType, valueAsString);
+                        if (prop.CanWrite)
+                        {
+                            prop.SetValue(prodData, valueAsObject, null);
+                        }
                     }
                     catch (Exception ex)
                     {
@@ -80,19 +66,20 @@ namespace ProductFileReader.Common.Commands
                     }
                     
                 }
-
+                result.Add(prodData);
             }
-            return null;
+            return result;
         }
 
 
         private static object ParseStringValue(Type propertyType, string valueAsString)
         {
+            var customCulture = (CultureInfo)CultureInfo.CurrentCulture.Clone();
             if (propertyType == typeof(string))
             {
                 return valueAsString;
             }
-            else if (propertyType == typeof(Int32))
+            else if (propertyType == typeof(int))
             {
                 int numberValue;
                 if (int.TryParse(valueAsString, out numberValue))
@@ -101,10 +88,13 @@ namespace ProductFileReader.Common.Commands
                 }
                 throw new Exception(string.Format(Constants.ErrorMessages.InvalidDataValue, valueAsString, propertyType));
             }
-            else if (propertyType == typeof (decimal?))
+            else if (propertyType == typeof (decimal?)) //Maybe to double.
             {
                 decimal decimalValue;
-                if (decimal.TryParse(valueAsString, out decimalValue))
+                customCulture.NumberFormat.NumberDecimalSeparator = ".";
+                customCulture.NumberFormat.NumberGroupSeparator = "";
+               
+                if (decimal.TryParse(valueAsString, NumberStyles.AllowDecimalPoint, customCulture, out decimalValue))
                 {
                     return decimalValue;
                 }
@@ -119,6 +109,24 @@ namespace ProductFileReader.Common.Commands
                 }
                 throw new Exception(string.Format(Constants.ErrorMessages.InvalidDataValue, valueAsString, propertyType));
             }
+            else if (propertyType == typeof (DateTime))
+            {
+                DateTime dateTimeValue;
+                if (DateTime.TryParse(valueAsString, out dateTimeValue))
+                {
+                    return dateTimeValue;
+                }
+                throw new Exception(string.Format(Constants.ErrorMessages.InvalidDataValue, valueAsString, propertyType));
+            }
+            else if (propertyType == typeof (ComplexityType))
+            {
+                ComplexityType complexityTypeValue;
+                if (Enum.TryParse(valueAsString, out complexityTypeValue))
+                {
+                    return complexityTypeValue;
+                }
+                throw new Exception(string.Format(Constants.ErrorMessages.InvalidDataValue, valueAsString, propertyType));
+            }
             return null;
         }
 
@@ -126,13 +134,12 @@ namespace ProductFileReader.Common.Commands
         {
             noOfRows = 0;
             var data = new List<FileDataColumn>();
-            using (StreamReader sr = new StreamReader(fileName))
+            using (var sr = new StreamReader(fileName))
             {
-                var line = string.Empty;
                 var headerRow = true;
                 while (!sr.EndOfStream)
                 {
-                    line = sr.ReadLine();
+                    var line = sr.ReadLine();
                     if (line != null && (line.StartsWith("#") || string.IsNullOrEmpty(line))) continue;
                     var values = line.Split('\t').ToList();
                     if (headerRow)
