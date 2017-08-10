@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using ProductFileReader.Common.Entities;
 using ProductFileReader.Common.Exceptions;
@@ -15,14 +16,17 @@ namespace ProductFileReader.Common.Commands
     public static class Commands
     {
 
-        public static string Read(string file, int project = -1000 ,bool sortbystartdate = false)
+        public static string Read(string file, int? project = null, bool sortbystartdate = false)
         {
             try
             {
                 int noOfValueRows = 0;
                 var fileDataColumns = ReadFileData(file, out noOfValueRows);
                 var productData = DataToObjects(fileDataColumns, noOfValueRows);
+                if(project.HasValue) productData = FilterByProject(productData, project.Value);
+                if(sortbystartdate) productData = SortDataByStartDate(productData);
                 return string.Empty;
+
             }
             catch (InputException ex)
             {
@@ -32,6 +36,19 @@ namespace ProductFileReader.Common.Commands
             {
                 throw new FatalException(Constants.ErrorMessages.FatalError);
             }
+        }
+
+
+        //ToDo: Make more generic.
+        private static IEnumerable<ProductData> FilterByProject(IEnumerable<ProductData> data, int projectId)
+        {
+            return data.Where(di => di.Project == projectId);
+        } 
+
+        //ToDo: Make more generic.
+        private static IEnumerable<ProductData> SortDataByStartDate(IEnumerable<ProductData> data)
+        {
+            return data.OrderByDescending(di => di.StartDate);
         }
 
         private static IEnumerable<ProductData> DataToObjects(List<FileDataColumn> dataCols, int noOfRows)
@@ -75,25 +92,25 @@ namespace ProductFileReader.Common.Commands
         private static object ParseStringValue(Type propertyType, string valueAsString)
         {
             var customCulture = (CultureInfo)CultureInfo.CurrentCulture.Clone();
+            customCulture.NumberFormat.NumberDecimalSeparator = ".";
+            customCulture.NumberFormat.NumberGroupSeparator = "";
+            Thread.CurrentThread.CurrentCulture = customCulture;
             if (propertyType == typeof(string))
             {
                 return valueAsString;
             }
             else if (propertyType == typeof(int))
             {
-                int numberValue;
-                if (int.TryParse(valueAsString, out numberValue))
+                int numericValue;
+                if (int.TryParse(valueAsString, out numericValue))
                 {
-                    return numberValue;
+                    return numericValue;
                 }
                 throw new Exception(string.Format(Constants.ErrorMessages.InvalidDataValue, valueAsString, propertyType));
             }
-            else if (propertyType == typeof (decimal?)) //Maybe to double.
+            else if (propertyType == typeof (decimal?)) 
             {
                 decimal decimalValue;
-                customCulture.NumberFormat.NumberDecimalSeparator = ".";
-                customCulture.NumberFormat.NumberGroupSeparator = "";
-               
                 if (decimal.TryParse(valueAsString, NumberStyles.AllowDecimalPoint, customCulture, out decimalValue))
                 {
                     return decimalValue;
@@ -112,7 +129,7 @@ namespace ProductFileReader.Common.Commands
             else if (propertyType == typeof (DateTime))
             {
                 DateTime dateTimeValue;
-                if (DateTime.TryParse(valueAsString, out dateTimeValue))
+                if (DateTime.TryParseExact(valueAsString, Constants.Formats.DateTimeFormat, customCulture, DateTimeStyles.None, out dateTimeValue))
                 {
                     return dateTimeValue;
                 }

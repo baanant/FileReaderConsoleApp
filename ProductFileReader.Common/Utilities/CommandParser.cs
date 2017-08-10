@@ -35,7 +35,7 @@ namespace ProductFileReader.Common.Utilities
                             result.Arguments.Add(argumentName, split);
                             argumentName = string.Empty;
                         }
-                        else if (!String.IsNullOrEmpty(argumentName))
+                        else if (!string.IsNullOrEmpty(argumentName))
                         {
                             result.Arguments.Add(argumentName, string.Empty);
                             argumentName = split;
@@ -57,15 +57,16 @@ namespace ProductFileReader.Common.Utilities
 
         }
 
+        //Todo: Create a proper Regex.
         private static string RemoveExtraChars(string inputSplit)
         {
             var result = inputSplit.Replace(">", string.Empty).Replace("<", string.Empty).Replace("\\", @"\").Replace("//", "/");
             return result;
         }
 
+        //ToDo! Make this to work with tabs as well.
         private static bool IsArgumentValue(string inputSplit, string argumentName)
         {
-            //ToDo! Make this to work with tabs as well.
             return Regex.IsMatch(inputSplit, Constants.RegexPatterns.ArgumentPattern) && !string.IsNullOrEmpty(argumentName);
         }
 

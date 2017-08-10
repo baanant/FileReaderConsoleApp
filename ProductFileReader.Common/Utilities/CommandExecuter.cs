@@ -52,9 +52,8 @@ namespace ProductFileReader.Common.Utilities
                     string inputDataValue;
                     if (inputData.Arguments.TryGetValue(methodParam.Name, out inputDataValue))
                     {
-                        object value = null;
                         var paramType = methodParam.ParameterType;
-                        value = ParseParameterValue(paramType, inputDataValue);
+                        var value = (paramType.IsGenericType && paramType.GetGenericTypeDefinition() == typeof(Nullable<>) && string.IsNullOrEmpty(inputDataValue)) ? null : ParseParameterValue(paramType, inputDataValue);
                         parameterValues[methodParam.Name] = value;
                     }
 
@@ -67,32 +66,28 @@ namespace ProductFileReader.Common.Utilities
         //ToDo: Add more supported types.
         private static object ParseParameterValue(Type type, string inputValue)
         {
-            object result = null;
-            var typeCode = Type.GetTypeCode(type);
-            switch (typeCode)
+            var inputType = type.IsGenericType && type.GetGenericTypeDefinition() == typeof (Nullable<>)
+                ? Nullable.GetUnderlyingType(type)
+                : type;
+            if (inputType == typeof (string))
             {
-                case TypeCode.String:
-                    result = inputValue;
-                    break;
-                case TypeCode.Int32:
-                    int numberValue;
-                    inputValue = Regex.Match(inputValue, @"\d+").Value;
-                    if (Int32.TryParse(inputValue, out numberValue))
-                    {
-                        result = numberValue;
-                        break;
-                    }
-                    else
-                    {
-                        throw new InputException(string.Format(Constants.ErrorMessages.TypeParsingError, inputValue));
-                    }
-                case TypeCode.Boolean:
-                    result = true;
-                    break;
-                default:
-                    throw new InputException(string.Format(Constants.ErrorMessages.TypeParsingError, inputValue));
+                return inputValue;
             }
-            return result;
+            else if (inputType == typeof (int))
+            {
+                int numericValue;
+                inputValue = Regex.Match(inputValue, Constants.RegexPatterns.NumericPattern).Value;
+                if (int.TryParse(inputValue, out numericValue))
+                {
+                    return numericValue;
+                }
+                throw new InputException(string.Format(Constants.ErrorMessages.TypeParsingError, inputValue));
+            }
+            else if (inputType == typeof (bool))
+            {
+                return true;
+            }
+            throw new InputException(string.Format(Constants.ErrorMessages.TypeParsingError, inputValue));
         }
 
   

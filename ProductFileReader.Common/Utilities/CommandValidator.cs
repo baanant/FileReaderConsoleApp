@@ -61,14 +61,7 @@ namespace ProductFileReader.Common.Utilities
             bob.Append(Constants.ErrorMessages.InvalidParamsFound);
             foreach (var invalidParam in invalidParams)
             {
-                if (invalidParams.Last() == invalidParam)
-                {
-                    bob.AppendFormat("{0}. ", invalidParam);
-                }
-                else
-                {
-                    bob.AppendFormat("{0}, ", invalidParam);
-                }
+                bob.AppendFormat(invalidParams.Last() == invalidParam ? "{0}. " : "{0}, ", invalidParam);
             }
             bob.Append(Constants.ErrorMessages.TryAgain);
             return bob.ToString();
