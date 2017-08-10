@@ -4,23 +4,21 @@ namespace ProductFileReader.Common.Exceptions
 {
     public class FatalException : Exception
     {
-        string _innerExceptionMsg;
         public FatalException(string message) : base(message)
         {
             GetInnerExceptionMessages(InnerException);
         }
 
-        public string InnerExceptionMessages { get { return _innerExceptionMsg; } }
+        public string InnerExceptionMessages { get; private set; }
 
         private void GetInnerExceptionMessages(Exception ex)
         {
-            if (ex != null && ex.InnerException != null)
+            while (true)
             {
-                _innerExceptionMsg = $"{_innerExceptionMsg} \n {ex.InnerException.Message}";
-                GetInnerExceptionMessages(ex.InnerException.InnerException);
+                if (ex == null || ex.InnerException == null) return;
+                InnerExceptionMessages = $"{InnerExceptionMessages} \n {ex.InnerException.Message}";
+                ex = ex.InnerException.InnerException;
             }
         }
-
-
     }
 }

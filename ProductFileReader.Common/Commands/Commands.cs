@@ -19,11 +19,13 @@ namespace ProductFileReader.Common.Commands
         {
             try
             {
-                int noOfValueRows = 0;
+                int noOfValueRows;
                 var fileDataColumns = ReadFileData(file, out noOfValueRows);
-                var productData = DataToObjects(fileDataColumns, noOfValueRows);
-                if(project.HasValue) productData = FilterByProject(productData, project.Value);
-                if(sortbystartdate) productData = SortDataByStartDate(productData);
+                var productData     = DataToObjects(fileDataColumns, noOfValueRows);
+                if(project.HasValue)
+                    productData     = FilterByProject(productData, project.Value);
+                if(sortbystartdate)
+                    productData     = SortDataByStartDate(productData);
                 return string.Empty;
 
             }
@@ -31,7 +33,7 @@ namespace ProductFileReader.Common.Commands
             {
                 throw ex;
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 throw new FatalException(Constants.ErrorMessages.FatalError);
             }
@@ -178,7 +180,6 @@ namespace ProductFileReader.Common.Commands
 
             //ToDo: Get more descriptive error message here, with the row number.
             if(!data.HasSameNumberOfValues()) throw new InputException(Constants.ErrorMessages.InvalidInputFileData);
-    
             return data;
         }
 

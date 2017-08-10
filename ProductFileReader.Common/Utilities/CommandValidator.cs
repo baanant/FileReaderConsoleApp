@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -22,7 +21,7 @@ namespace ProductFileReader.Common.Utilities
                 throw new InputException(string.Format(Constants.ErrorMessages.UnrecognizedCommandError, cmdInput.MethodName));
             }
 
-            if (!correctClass.CommandMethodData.Any(cmd => cmd.MethodName == cmdInput.MethodName))
+            if (correctClass.CommandMethodData.All(cmd => cmd.MethodName != cmdInput.MethodName))
             {
                 throw new InputException(string.Format(Constants.ErrorMessages.UnrecognizedCommand, cmdInput.MethodName));
             }
@@ -53,21 +52,18 @@ namespace ProductFileReader.Common.Utilities
                 }
             }
 
-            if (requiredParams.Any() || optionalParams.Any())
+            if (!requiredParams.Any() && !optionalParams.Any()) return;
+            var invalidParameters = GetInvalidParams(optionalParams, requiredParams, cmdInput.Arguments);
+            if (invalidParameters.Any())
             {
-                var invalidParameters = GetInvalidParams(optionalParams, requiredParams, cmdInput.Arguments);
-                if (invalidParameters.Any())
-                {
-                    var errorMsg = CreateInvalidParameterErrorMsg(invalidParameters);
-                    throw new InputException(errorMsg);
-                }
+                var errorMsg = CreateInvalidParameterErrorMsg(invalidParameters);
+                throw new InputException(errorMsg);
             }
- 
         }
 
         private static string CreateInvalidParameterErrorMsg(IEnumerable<string> invalidParams)
         {
-            StringBuilder bob = new StringBuilder();
+            var bob = new StringBuilder();
             bob.Append(Constants.ErrorMessages.InvalidParamsFound);
             foreach (var invalidParam in invalidParams)
             {

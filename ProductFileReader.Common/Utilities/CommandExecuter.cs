@@ -16,7 +16,7 @@ namespace ProductFileReader.Common.Utilities
             try
             {
                 var parameterValues = SetParameterValues(classData, inputData);
-                Type classType = assembly.GetType($"{Constants.Commands.CommandNamespace}.{classData.Name}");
+                var classType       = assembly.GetType($"{Constants.Commands.CommandNamespace}.{classData.Name}");
                 object[] methodParameterValues = null;
                 if (parameterValues != null && parameterValues.Any())
                 {
@@ -39,30 +39,24 @@ namespace ProductFileReader.Common.Utilities
         private static List<object> SetParameterValues(CommandClassData classData, CommandInputData inputData)
         {
             var parameterValues = new Dictionary<string, object>();
-            var methodData = classData.CommandMethodData.FirstOrDefault(cmd => cmd.MethodName == inputData.MethodName);
+            var methodData      = classData.CommandMethodData.FirstOrDefault(cmd => cmd.MethodName == inputData.MethodName);
             if(methodData == null) throw new Exception();
-            if (methodData.Parameters.Any())
+            if (!methodData.Parameters.Any()) return null;
+            methodData.Parameters.ForEach(mp =>
             {
-                methodData.Parameters.ForEach(mp =>
-                {
-                    parameterValues.Add(mp.Name,mp.DefaultValue);
-                });
+                parameterValues.Add(mp.Name,mp.DefaultValue);
+            });
 
 
-                foreach (var methodParam in methodData.Parameters)
-                {
-                    string inputDataValue;
-                    if (inputData.Arguments.TryGetValue(methodParam.Name, out inputDataValue))
-                    {
-                        var paramType = methodParam.ParameterType;
-                        var value = (paramType.IsGenericType && paramType.GetGenericTypeDefinition() == typeof(Nullable<>) && string.IsNullOrEmpty(inputDataValue)) ? null : ParseParameterValue(paramType, inputDataValue);
-                        parameterValues[methodParam.Name] = value;
-                    }
-
-                }
-                return parameterValues.Values.ToList();
+            foreach (var methodParam in methodData.Parameters)
+            {
+                string inputDataValue;
+                if (!inputData.Arguments.TryGetValue(methodParam.Name, out inputDataValue)) continue;
+                var paramType   = methodParam.ParameterType;
+                var value       = (paramType.IsGenericType && paramType.GetGenericTypeDefinition() == typeof(Nullable<>) && string.IsNullOrEmpty(inputDataValue)) ? null : ParseParameterValue(paramType, inputDataValue);
+                parameterValues[methodParam.Name] = value;
             }
-            return null;
+            return parameterValues.Values.ToList();
         }
 
         //ToDo: Add more supported types.
@@ -75,7 +69,7 @@ namespace ProductFileReader.Common.Utilities
             {
                 return inputValue;
             }
-            else if (inputType == typeof (int))
+            if (inputType == typeof (int))
             {
                 int numericValue;
                 inputValue = Regex.Match(inputValue, Constants.RegexPatterns.NumericPattern).Value;
@@ -85,7 +79,7 @@ namespace ProductFileReader.Common.Utilities
                 }
                 throw new InputException(string.Format(Constants.ErrorMessages.TypeParsingError, inputValue));
             }
-            else if (inputType == typeof (bool))
+            if (inputType == typeof (bool))
             {
                 return true;
             }

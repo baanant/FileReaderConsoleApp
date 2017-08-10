@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace ProductFileReader.Common.Entities
 {
@@ -11,7 +7,7 @@ namespace ProductFileReader.Common.Entities
         public FileDataColumn(string header)
         {
             HeaderTitle = header;
-            Values = new List<string>();
+            Values      = new List<string>();
         }
 
         public string HeaderTitle { get; set; }

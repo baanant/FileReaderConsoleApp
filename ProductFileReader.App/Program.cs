@@ -18,21 +18,21 @@ namespace ProductFileReader.App
             Init();
         }
 
-        static void Init()
+        private static void Init()
         {
             while (true)
             {
                 var inputCommandText = Read();
-                if (String.IsNullOrWhiteSpace(inputCommandText)) continue;
+                if (string.IsNullOrWhiteSpace(inputCommandText)) continue;
 
                 try
                 {
 
-                    var cmdClassData = CommandParser.ParseClassData(Constants.Commands.CommandNamespace);
-                    var cmdInputData = CommandParser.ParseInputData(inputCommandText, Constants.Commands.CommandClassName);
+                    var cmdClassData    = CommandParser.ParseClassData(Constants.Commands.CommandNamespace);
+                    var cmdInputData    = CommandParser.ParseInputData(inputCommandText, Constants.Commands.CommandClassName);
                     CommandValidator.Validate(cmdClassData, cmdInputData);
-                    var classData = cmdClassData.FirstOrDefault(c => c.Name == cmdInputData.ClassName);
-                    var result = CommandExecuter.ExecuteMethod(classData, cmdInputData, typeof(Commands).Assembly);
+                    var classData       = cmdClassData.FirstOrDefault(c => c.Name == cmdInputData.ClassName);
+                    var result          = CommandExecuter.ExecuteMethod(classData, cmdInputData, typeof(Commands).Assembly);
                     Write(result);
                 }
                 catch (InputException inputException)
@@ -46,13 +46,13 @@ namespace ProductFileReader.App
             }
         }
 
-        static string Read()
+        private static string Read()
         {
             Console.Write(Constants.General.ConsolePrompt);
             return Console.ReadLine();
         }
 
-        static void Write(string text)
+        private static void Write(string text)
         {
             if(!string.IsNullOrEmpty(text)) Console.WriteLine(text);
         }

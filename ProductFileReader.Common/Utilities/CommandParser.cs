@@ -16,9 +16,9 @@ namespace ProductFileReader.Common.Utilities
         {
             try
             {
-                var result = new CommandInputData(cmdClassName);
-                var splitted = SplitInputText(inputCmdText);
-                var argumentName = string.Empty;
+                var result          = new CommandInputData(cmdClassName);
+                var splitted        = SplitInputText(inputCmdText);
+                var argumentName    = string.Empty;
 
                 for (var i = 0; i < splitted.Count(); i++)
                 {
