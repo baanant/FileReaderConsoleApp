@@ -42,8 +42,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Commands\Commands.cs" />
+    <Compile Include="CustomAttributes\ValueRequiredForParamsAttribute.cs" />
     <Compile Include="Entities\CommandClassData.cs" />
     <Compile Include="Entities\CommandInputData.cs" />
+    <Compile Include="Entities\CommandMethodData.cs" />
     <Compile Include="Entities\ComplexityType.cs" />
     <Compile Include="Entities\FileDataColumn.cs" />
     <Compile Include="Entities\ProductData.cs" />

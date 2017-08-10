@@ -5,17 +5,16 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using ProductFileReader.Common.Entities;
 using ProductFileReader.Common.Exceptions;
+using ProductFileReader.Common.CustomAttributes;
 
 namespace ProductFileReader.Common.Commands
 {
     public static class Commands
     {
-
+        [ValueRequiredForParams("file","project")]
         public static string Read(string file, int? project = null, bool sortbystartdate = false)
         {
             try
@@ -63,7 +62,6 @@ namespace ProductFileReader.Common.Commands
                     var prop = productDataProperties[i];
                     var propertyType = prop.PropertyType;
                     var displayName = prop.GetCustomAttribute<DisplayAttribute>().Name;
-                    
                     var dataCol = dataCols.FirstOrDefault(dc => dc.HeaderTitle == displayName);
                     var valueAsString = dataCol == null ? string.Empty : dataCol.Values[r];
                     try
@@ -195,4 +193,6 @@ namespace ProductFileReader.Common.Commands
 
         
     }
+
+ 
 }

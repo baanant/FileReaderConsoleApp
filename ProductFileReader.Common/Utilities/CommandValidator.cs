@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -21,13 +22,22 @@ namespace ProductFileReader.Common.Utilities
                 throw new InputException(string.Format(Constants.ErrorMessages.UnrecognizedCommandError, cmdInput.MethodName));
             }
 
-            if (!correctClass.CommandMethodData.ContainsKey(cmdInput.MethodName))
+            if (!correctClass.CommandMethodData.Any(cmd => cmd.MethodName == cmdInput.MethodName))
             {
                 throw new InputException(string.Format(Constants.ErrorMessages.UnrecognizedCommand, cmdInput.MethodName));
             }
-            var classMethodParams = correctClass.CommandMethodData[cmdInput.MethodName];
+            var classMethod = correctClass.CommandMethodData.First(cmd => cmd.MethodName == cmdInput.MethodName);
+            var classMethodParams = classMethod.Parameters;
             var requiredParams = classMethodParams.Where(p => !p.IsOptional).ToList();
             var optionalParams = classMethodParams.Where(p => p.IsOptional).ToList();
+
+            cmdInput.Arguments.ToList().ForEach(a =>
+            {
+                if (classMethod.RequiredValueParams.Contains(a.Key) && string.IsNullOrEmpty(a.Value))
+                {
+                    throw new InputException(string.Format(Constants.ErrorMessages.ArgValueRequired, a.Key));
+                }
+            });
 
             if (cmdInput.Arguments.Count() > classMethodParams.Count)
             {
@@ -67,7 +77,7 @@ namespace ProductFileReader.Common.Utilities
             return bob.ToString();
         }
 
-        private static string ValidateRequiredParams(List<ParameterInfo> requiredMethodParams, Dictionary<string, string> inputParams)
+        private static string ValidateRequiredParams(List<ParameterInfo> requiredMethodParams, IReadOnlyDictionary<string, string> inputParams)
         {
             var result = string.Empty;
             requiredMethodParams.ForEach(rp =>

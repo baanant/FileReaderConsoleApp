@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 
 namespace ProductFileReader.Common.Entities
@@ -8,24 +9,26 @@ namespace ProductFileReader.Common.Entities
         public CommandClassData(string name)
         {
             Name                = name;
-            CommandMethodData   = new Dictionary<string, List<ParameterInfo>>();
+            CommandMethodData   = new List<CommandMethodData>();
         }
 
         public string Name { get; set; }
 
-        public Dictionary<string, List<ParameterInfo>> CommandMethodData { get; set; }
 
-        public void AddMethodParameterInfos(string methodName, ParameterInfo[] parameters)
+        public List<CommandMethodData> CommandMethodData { get; set; }
+
+        public void AddMethodParameterInfos(string methodName, ParameterInfo[] parameters, IEnumerable<string> requiredValueParameters)
         {
-            if (CommandMethodData.ContainsKey(methodName))
+            var existingCmd = CommandMethodData.FirstOrDefault(cmd => cmd.MethodName == methodName);
+            if (existingCmd != null)
             {
-                CommandMethodData[methodName].AddRange(parameters);
+                existingCmd.Parameters.AddRange(parameters);
+                existingCmd.RequiredValueParams.ToList().AddRange(requiredValueParameters);
             }
             else
             {
-                var parameterInfos = new List<ParameterInfo>();
-                parameterInfos.AddRange(parameters);
-                CommandMethodData.Add(methodName, parameterInfos );
+                var newCmd = new CommandMethodData(methodName, parameters, requiredValueParameters);
+                CommandMethodData.Add(newCmd);
             }
         }
 

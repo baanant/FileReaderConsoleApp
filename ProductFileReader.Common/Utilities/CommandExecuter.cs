@@ -39,15 +39,17 @@ namespace ProductFileReader.Common.Utilities
         private static List<object> SetParameterValues(CommandClassData classData, CommandInputData inputData)
         {
             var parameterValues = new Dictionary<string, object>();
-            var methodParameters = classData.CommandMethodData[inputData.MethodName];
-            if (methodParameters.Any())
+            var methodData = classData.CommandMethodData.FirstOrDefault(cmd => cmd.MethodName == inputData.MethodName);
+            if(methodData == null) throw new Exception();
+            if (methodData.Parameters.Any())
             {
-                methodParameters.ForEach(mp =>
+                methodData.Parameters.ForEach(mp =>
                 {
                     parameterValues.Add(mp.Name,mp.DefaultValue);
                 });
 
-                foreach (var methodParam in methodParameters)
+
+                foreach (var methodParam in methodData.Parameters)
                 {
                     string inputDataValue;
                     if (inputData.Arguments.TryGetValue(methodParam.Name, out inputDataValue))

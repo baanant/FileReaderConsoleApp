@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using ProductFileReader.Common.CustomAttributes;
 using ProductFileReader.Common.Entities;
 using ProductFileReader.Common.Exceptions;
 
@@ -97,7 +98,10 @@ namespace ProductFileReader.Common.Utilities
                     var cmdClassMethods = c.GetMethods(BindingFlags.Static | BindingFlags.Public).ToList();
                     cmdClassMethods.ForEach(cm =>
                     {
-                        cmdClassData.AddMethodParameterInfos(cm.Name, cm.GetParameters());
+                        var requiredValueParams = cm.GetCustomAttribute<ValueRequiredForParamsAttribute>().Parameters;
+                        cmdClassData.AddMethodParameterInfos(cm.Name, cm.GetParameters(), requiredValueParams);
+                        
+
                     });
                     result.Add(cmdClassData);
                 });

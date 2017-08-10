@@ -38,6 +38,7 @@
             public const string TypeParsingError            = "Could not parse the input argument '{0}'. Please try again.";
             public const string InvalidInputFileData        = "Invalid file content. Please try again.";
             public const string InvalidDataValue            = "Invalid value '{0}' of type '{1}'. Please check the input file content on row {{0}}";
+            public const string ArgValueRequired            = "Value is required for argument '{0}'. Please try again.";
         }
 
         public struct InputData
