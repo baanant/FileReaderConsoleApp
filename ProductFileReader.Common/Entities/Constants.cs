@@ -11,6 +11,7 @@
         public struct Formats
         {
             public const string DateTimeFormat              = "yyyy-MM-dd hh:mm:ss.fff";
+            public const string DecimalFormat               = "#.000000";
         }
 
         public struct RegexPatterns

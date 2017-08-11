@@ -15,18 +15,18 @@ namespace ProductFileReader.Common.Utilities
     {
         public static IEnumerable<T> DataToObjects<T>(List<FileDataColumn> dataCols, int noOfRows)
         {
-            var result = new List<T>();
-            var productDataProperties = typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance);
+            var result                  = new List<T>();
+            var productDataProperties   = typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance);
             for (var r = 0; r < noOfRows; r++)
             {
                 var prodData = Activator.CreateInstance(typeof(T));
                 for (var i = 0; i < productDataProperties.Count(); i++)
                 {
-                    var prop = productDataProperties[i];
-                    var propertyType = prop.PropertyType;
-                    var displayName = prop.GetCustomAttribute<DisplayAttribute>().Name;
-                    var dataCol = dataCols.FirstOrDefault(dc => dc.HeaderTitle == displayName);
-                    var valueAsString = dataCol == null ? string.Empty : dataCol.Values[r];
+                    var prop            = productDataProperties[i];
+                    var propertyType    = prop.PropertyType;
+                    var displayName     = prop.GetCustomAttribute<DisplayAttribute>().Name;
+                    var dataCol         = dataCols.FirstOrDefault(dc => dc.HeaderTitle == displayName);
+                    var valueAsString   = dataCol == null ? string.Empty : dataCol.Values[r];
                     try
                     {
                         var valueAsObject =
@@ -55,6 +55,7 @@ namespace ProductFileReader.Common.Utilities
             var customCulture = (CultureInfo)CultureInfo.CurrentCulture.Clone();
             customCulture.NumberFormat.NumberDecimalSeparator = ".";
             customCulture.NumberFormat.NumberGroupSeparator = "";
+            customCulture.DateTimeFormat.TimeSeparator = ":";
             Thread.CurrentThread.CurrentCulture = customCulture;
             if (propertyType == typeof(string))
             {
@@ -111,24 +112,30 @@ namespace ProductFileReader.Common.Utilities
 
         public static IEnumerable<T> FilterBy<T>(IEnumerable<T> data, object filterValue, Expression<Func<T,object>> lambda )
         {
-            PropertyInfo propInfo;
-            if (lambda.Body is MemberExpression)
-            {
-                propInfo =  ((MemberExpression)lambda.Body).Member as PropertyInfo;
-            }
-            else {
-                var op = ((UnaryExpression)lambda.Body).Operand;
-                propInfo = ((MemberExpression)op).Member as PropertyInfo;
-            }
-            if(propInfo == null) throw new Exception();
+            var propInfo = GetPropertyInfo(lambda);
             return data.Where(di => propInfo.GetValue(di, null).Equals(filterValue));
         }
 
-        //public static IEnumerable<T> SortBy<T>(IEnumerable<T> data, object sortByValue, Expression<Funct<T, object>> lamda)
-        //{
-        //    return data.OrderByDescending(di => di.StartDate);
-        //}
+        public static IEnumerable<T> SortBy<T>(IEnumerable<T> data, Expression<Func<T, object>> lambda)
+        {
+            var propInfo = GetPropertyInfo(lambda);
+            return data.OrderByDescending(di => propInfo.GetValue(di,null));
+        }
 
+        private static PropertyInfo GetPropertyInfo<T>(Expression<Func<T, object>> lambda)
+        {
+            PropertyInfo propInfo;
+            if (lambda.Body is MemberExpression)
+            {
+                propInfo = ((MemberExpression)lambda.Body).Member as PropertyInfo;
+            }
+            else {
+                var op      = ((UnaryExpression)lambda.Body).Operand;
+                propInfo    = ((MemberExpression)op).Member as PropertyInfo;
+            }
+            if (propInfo == null) throw new Exception();
+            return propInfo;
+        }
 
 
     }
