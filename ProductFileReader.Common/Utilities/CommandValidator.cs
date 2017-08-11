@@ -86,7 +86,7 @@ namespace ProductFileReader.Common.Utilities
             return result;
         }
 
-        private static List<string> GetInvalidParams(IEnumerable<ParameterInfo> optionalMethodParams, IEnumerable<ParameterInfo> requiredMethodParams, Dictionary<string, string> inputParams)
+        private static IEnumerable<string> GetInvalidParams(IEnumerable<ParameterInfo> optionalMethodParams, IEnumerable<ParameterInfo> requiredMethodParams, Dictionary<string, string> inputParams)
         {
             var result = new List<string>();
             foreach (var inputParam in inputParams)

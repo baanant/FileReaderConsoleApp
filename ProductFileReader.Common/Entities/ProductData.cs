@@ -28,5 +28,7 @@ namespace ProductFileReader.Common.Entities
 
         [Display(Name = "Complexity")]
         public ComplexityType Complexity { get; set; }
+
+
     }
 }

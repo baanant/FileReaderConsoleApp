@@ -36,7 +36,7 @@ namespace ProductFileReader.Common.Utilities
            
         }
 
-        private static List<object> SetParameterValues(CommandClassData classData, CommandInputData inputData)
+        private static IEnumerable<object> SetParameterValues(CommandClassData classData, CommandInputData inputData)
         {
             var parameterValues = new Dictionary<string, object>();
             var methodData      = classData.CommandMethodData.FirstOrDefault(cmd => cmd.MethodName == inputData.MethodName);

@@ -56,6 +56,8 @@
     <Compile Include="Utilities\CommandExecuter.cs" />
     <Compile Include="Utilities\CommandParser.cs" />
     <Compile Include="Utilities\CommandValidator.cs" />
+    <Compile Include="Utilities\FileDataHandler.cs" />
+    <Compile Include="Utilities\FileReader.cs" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -17,7 +17,7 @@ namespace ProductFileReader.Common.Utilities
             try
             {
                 var result          = new CommandInputData(cmdClassName);
-                var splitted        = SplitInputText(inputCmdText);
+                var splitted        = SplitInputText(inputCmdText).ToList();
                 var argumentName    = string.Empty;
 
                 for (var i = 0; i < splitted.Count(); i++)
@@ -74,12 +74,11 @@ namespace ProductFileReader.Common.Utilities
 
 
 
-        private static List<string> SplitInputText(string inputCmdText)
+        private static IEnumerable<string> SplitInputText(string inputCmdText)
         {
             return Regex.Matches(inputCmdText, Constants.RegexPatterns.InputSplitPattern)
                 .Cast<Match>()
-                .Select(m => m.Value)
-                .ToList();
+                .Select(m => m.Value);
         }
 
         public static IEnumerable<CommandClassData> ParseClassData(string cmdNamespace)
