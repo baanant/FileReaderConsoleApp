@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Reflection;
-using System.Text.RegularExpressions;
 using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NUnit.Framework;

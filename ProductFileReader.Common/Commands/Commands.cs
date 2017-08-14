@@ -1,12 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Globalization;
-using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using System.Threading;
 using ProductFileReader.Common.Entities;
 using ProductFileReader.Common.Exceptions;
 using ProductFileReader.Common.CustomAttributes;
@@ -48,31 +45,48 @@ namespace ProductFileReader.Common.Commands
             var bob         = new StringBuilder();
             var prodData    = productData.ToList();
             var inputCols   = inputColumns.ToList();
-            foreach (var inputCol in inputCols)
-            {
-                bob.AppendFormat("{0}\t", inputCol.HeaderTitle);
-            }
+            bob             = WriteHeaderData(inputCols, bob);
             
-            for (int i = 0; i < prodData.ToList().Count(); i++)
+            for (var i = 0; i < prodData.ToList().Count(); i++)
             {
                 bob.Append(Environment.NewLine);
-                foreach (var inputCol in inputCols)
-                {
-
-                    var properties = prodData[i].GetType().GetProperties();
-                    foreach (var prop in properties)
-                    {
-                        if (prop.GetCustomAttribute<DisplayAttribute>().Name != inputCol.HeaderTitle) continue;
-                        var value   = prop.GetValue(prodData[i]);
-                        value       = value == null ? string.Empty : GetValidStringPresentation(value);
-                        bob.AppendFormat("{0}\t", value);
-                    }
-
-                }
+                var currentProd = prodData[i];
+                bob             = WritePropertyValues(currentProd, inputCols, bob);
             }
             return bob.ToString();
         }
 
+        private static StringBuilder WriteHeaderData(IEnumerable<FileDataColumn> inputCols, StringBuilder bob)
+        {
+            foreach (var inputCol in inputCols)
+            {
+                bob.AppendFormat("{0}\t", inputCol.HeaderTitle);
+            }
+            return bob;
+        }
+
+        private static StringBuilder WritePropertyValues(ProductData prodData, IEnumerable<FileDataColumn> inputCols,
+            StringBuilder bob)
+        {
+            foreach (var inputCol in inputCols)
+            {
+                bob = WritePropertyValue(prodData, inputCol, bob);
+            }
+            return bob;
+        }
+
+        private static StringBuilder WritePropertyValue(ProductData prodData,  FileDataColumn inputCol, StringBuilder bob)
+        {
+            var properties = prodData.GetType().GetProperties();
+            foreach (var prop in properties)
+            {
+                if (prop.GetCustomAttribute<DisplayAttribute>().Name != inputCol.HeaderTitle) continue;
+                var value = prop.GetValue(prodData);
+                value = value == null ? string.Empty : GetValidStringPresentation(value);
+                bob.AppendFormat("{0}\t", value);
+            }
+            return bob;
+        }
 
         private static string GetValidStringPresentation(object value)
         {

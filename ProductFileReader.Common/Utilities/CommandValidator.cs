@@ -7,6 +7,9 @@ using ProductFileReader.Common.Exceptions;
 
 namespace ProductFileReader.Common.Utilities
 {
+    /// <summary>
+    /// Validator class to validate the command class functionality against the input commands.   
+    /// </summary>
     public static class CommandValidator
     {
         public static void Validate(IEnumerable<CommandClassData> cmdClasses, CommandInputData cmdInput)
@@ -20,16 +23,18 @@ namespace ProductFileReader.Common.Utilities
             {
                 throw new InputException(string.Format(Constants.ErrorMessages.UnrecognizedCommandError, cmdInput.MethodName));
             }
-
             if (correctClass.CommandMethodData.All(cmd => cmd.MethodName != cmdInput.MethodName))
             {
                 throw new InputException(string.Format(Constants.ErrorMessages.UnrecognizedCommand, cmdInput.MethodName));
             }
-            var classMethod = correctClass.CommandMethodData.First(cmd => cmd.MethodName == cmdInput.MethodName);
-            var classMethodParams = classMethod.Parameters;
-            var requiredParams = classMethodParams.Where(p => !p.IsOptional).ToList();
-            var optionalParams = classMethodParams.Where(p => p.IsOptional).ToList();
 
+            //Get corresponding class data.
+            var classMethod         = correctClass.CommandMethodData.First(cmd => cmd.MethodName == cmdInput.MethodName);
+            var classMethodParams   = classMethod.Parameters;
+            var requiredParams      = classMethodParams.Where(p => !p.IsOptional).ToList();
+            var optionalParams      = classMethodParams.Where(p => p.IsOptional).ToList();
+
+            //Check if values are given for arguments which require them.
             cmdInput.Arguments.ToList().ForEach(a =>
             {
                 if (classMethod.RequiredValueParams.Contains(a.Key) && string.IsNullOrEmpty(a.Value))
@@ -38,6 +43,7 @@ namespace ProductFileReader.Common.Utilities
                 }
             });
 
+            //Check if number of given arguments is not bigger than accepted parameter count.
             if (cmdInput.Arguments.Count() > classMethodParams.Count)
             {
                 throw new InputException(Constants.ErrorMessages.TooManyParams);
