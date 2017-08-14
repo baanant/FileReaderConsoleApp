@@ -2,6 +2,9 @@
 
 namespace ProductFileReader.Common.Entities
 {
+    /// <summary>
+    /// Simple data column class to collect the data from .txt files.
+    /// </summary>
     public class FileDataColumn
     {
         public FileDataColumn(string header)

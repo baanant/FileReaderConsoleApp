@@ -3,6 +3,9 @@ using System.ComponentModel.DataAnnotations;
 
 namespace ProductFileReader.Common.Entities
 {
+    /// <summary>
+    /// Product data class to present one row in input file. Display attributes are the input file header texts.
+    /// </summary>
     public class ProductData
     {
         [Display(Name = "Project")]

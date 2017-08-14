@@ -12,6 +12,11 @@ namespace ProductFileReader.Common.Utilities
     /// </summary>
     public static class CommandValidator
     {
+        /// <summary>
+        /// Validate the command input against the available command classes. 
+        /// </summary>
+        /// <param name="cmdClasses">Command classes.</param>
+        /// <param name="cmdInput">Command input.</param>
         public static void Validate(IEnumerable<CommandClassData> cmdClasses, CommandInputData cmdInput)
         {
             if (cmdClasses == null)
@@ -49,6 +54,7 @@ namespace ProductFileReader.Common.Utilities
                 throw new InputException(Constants.ErrorMessages.TooManyParams);
             }
 
+            //Check if required parameters are missing. 
             if (requiredParams.Any())
             {
                 var missingRequiredParam = ValidateRequiredParams(requiredParams, cmdInput.Arguments);
@@ -59,6 +65,8 @@ namespace ProductFileReader.Common.Utilities
             }
 
             if (!requiredParams.Any() && !optionalParams.Any()) return;
+
+            //Check if any invalid parameters exists.
             var invalidParameters = GetInvalidParams(optionalParams, requiredParams, cmdInput.Arguments);
             if (invalidParameters.Any())
             {
@@ -66,6 +74,7 @@ namespace ProductFileReader.Common.Utilities
                 throw new InputException(errorMsg);
             }
         }
+
 
         private static string CreateInvalidParameterErrorMsg(IEnumerable<string> invalidParams)
         {

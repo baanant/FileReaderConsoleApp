@@ -11,8 +11,12 @@ using ProductFileReader.Common.Exceptions;
 
 namespace ProductFileReader.Common.Utilities
 {
+    /// <summary>
+    /// A handler class to parse input data to relevant object types and to filter and sort the data. 
+    /// </summary>
     public static class FileDataHandler
     {
+
         public static IEnumerable<T> DataToObjects<T>(List<FileDataColumn> dataCols, int noOfRows)
         {
             var result                  = new List<T>();
@@ -49,14 +53,23 @@ namespace ProductFileReader.Common.Utilities
             return result;
         }
 
-     
+        
+        /// <summary>
+        /// Try to parse the string value into a given property type.
+        /// </summary>
+        /// <param name="propertyType">Property type</param>
+        /// <param name="valueAsString">Input string value</param>
+        /// <returns>Parsed object.</returns>
         private static object ParseStringValue(Type propertyType, string valueAsString)
         {
+            //Change the number and datetime formats of the current thread. 
             var customCulture = (CultureInfo)CultureInfo.CurrentCulture.Clone();
             customCulture.NumberFormat.NumberDecimalSeparator = ".";
             customCulture.NumberFormat.NumberGroupSeparator = "";
             customCulture.DateTimeFormat.TimeSeparator = ":";
             Thread.CurrentThread.CurrentCulture = customCulture;
+
+
             if (propertyType == typeof(string))
             {
                 return valueAsString;
@@ -109,19 +122,43 @@ namespace ProductFileReader.Common.Utilities
             return null;
         }
 
-
+        /// <summary>
+        /// A generic method to filter data by a specific object property value.
+        /// </summary>
+        /// <typeparam name="T">Data type.</typeparam>
+        /// <param name="data">Data to be filtered.</param>
+        /// <param name="filterValue">Filter value.</param>
+        /// <param name="lambda">Filter property lambda expression.</param>
+        /// <returns>Filtered data.</returns>
         public static IEnumerable<T> FilterBy<T>(IEnumerable<T> data, object filterValue, Expression<Func<T,object>> lambda )
         {
             var propInfo = GetPropertyInfo(lambda);
             return data.Where(di => propInfo.GetValue(di, null).Equals(filterValue));
         }
 
-        public static IEnumerable<T> SortBy<T>(IEnumerable<T> data, Expression<Func<T, object>> lambda)
+
+        /// <summary>
+        /// A generic method to sort data by a specific object property.
+        /// </summary>
+        /// <typeparam name="T">Data type.</typeparam>
+        /// <param name="data">Data to be sorted.</param>
+        /// <param name="lambda">Sort property lambda expression.</param>
+        /// <param name="desc">Sort by descending.</param>
+        /// <returns>Sorted data.</returns>
+        public static IEnumerable<T> SortBy<T>(IEnumerable<T> data, Expression<Func<T, object>> lambda, bool desc = false)
         {
             var propInfo = GetPropertyInfo(lambda);
-            return data.OrderByDescending(di => propInfo.GetValue(di,null));
+            return desc
+                ? data.OrderByDescending(di => propInfo.GetValue(di, null))
+                : data.OrderBy(di => propInfo.GetValue(di, null));
         }
 
+        /// <summary>
+        /// Get property information from lambda expression.
+        /// </summary>
+        /// <typeparam name="T">Data type.</typeparam>
+        /// <param name="lambda">Property information lambda expression.</param>
+        /// <returns>Property information.</returns>
         private static PropertyInfo GetPropertyInfo<T>(Expression<Func<T, object>> lambda)
         {
             PropertyInfo propInfo;

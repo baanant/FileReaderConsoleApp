@@ -4,6 +4,9 @@ using System.Reflection;
 
 namespace ProductFileReader.Common.Entities
 {
+    /// <summary>
+    /// A class to hold the method data for existing commands.
+    /// </summary>
     public class CommandMethodData
     {
         public CommandMethodData(string name, IEnumerable<ParameterInfo> parameters,

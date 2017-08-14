@@ -6,6 +6,9 @@ using ProductFileReader.Common.Exceptions;
 
 namespace ProductFileReader.Common.Utilities
 {
+    /// <summary>
+    /// A reader class to split tab separated text files into data columns.
+    /// </summary>
     public static class FileReader
     {
         public static List<FileDataColumn> ReadFileData(string fileName, out int noOfRows)
@@ -45,7 +48,11 @@ namespace ProductFileReader.Common.Utilities
         }
 
 
-
+        /// <summary>
+        /// A method to check if all the columns of the file has the same number of values.
+        /// </summary>
+        /// <param name="data">Read file column data.</param>
+        /// <returns>True if all the columns has the the same number of values, otherwise false.</returns>
         private static bool HasSameNumberOfValues(this IEnumerable<FileDataColumn> data)
         {
             if (data == null || data.First().Values == null) return false;

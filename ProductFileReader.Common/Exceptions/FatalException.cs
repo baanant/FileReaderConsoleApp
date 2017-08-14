@@ -2,6 +2,9 @@
 
 namespace ProductFileReader.Common.Exceptions
 {
+    /// <summary>
+    /// Fatal exception class.
+    /// </summary>
     public class FatalException : Exception
     {
         public FatalException(string message) : base(message)
@@ -11,6 +14,10 @@ namespace ProductFileReader.Common.Exceptions
 
         public string InnerExceptionMessages { get; private set; }
 
+        /// <summary>
+        /// Go deep.
+        /// </summary>
+        /// <param name="ex">Exception.</param>
         private void GetInnerExceptionMessages(Exception ex)
         {
             while (true)

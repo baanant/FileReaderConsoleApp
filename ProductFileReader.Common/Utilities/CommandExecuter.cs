@@ -8,8 +8,19 @@ using ProductFileReader.Common.Exceptions;
 
 namespace ProductFileReader.Common.Utilities
 {
+    /// <summary>
+    /// Executer class to execute commands with the input data.
+    /// </summary>
     public static class CommandExecuter
     {
+
+        /// <summary>
+        /// Method to execute the command class method with the user input parameters.
+        /// </summary>
+        /// <param name="classData">Command class data.</param>
+        /// <param name="inputData">User command input data.</param>
+        /// <param name="assembly">Assembly.</param>
+        /// <returns>String representation of the executed method.</returns>
         public static string ExecuteMethod(CommandClassData classData, CommandInputData inputData, Assembly assembly)
         {
             if(classData == null || assembly == null) throw new FatalException(Constants.ErrorMessages.FatalError);
@@ -36,18 +47,26 @@ namespace ProductFileReader.Common.Utilities
            
         }
 
+        /// <summary>
+        /// Sets the parameter values to a command method.
+        /// </summary>
+        /// <param name="classData"></param>
+        /// <param name="inputData"></param>
+        /// <returns></returns>
         private static IEnumerable<object> SetParameterValues(CommandClassData classData, CommandInputData inputData)
         {
             var parameterValues = new Dictionary<string, object>();
+            //Get the command method data.
             var methodData      = classData.CommandMethodData.FirstOrDefault(cmd => cmd.MethodName == inputData.MethodName);
             if(methodData == null) throw new Exception();
             if (!methodData.Parameters.Any()) return null;
+            //Set the method parameter default values.
             methodData.Parameters.ForEach(mp =>
             {
                 parameterValues.Add(mp.Name,mp.DefaultValue);
             });
 
-
+            //Try to set method parameter values.
             foreach (var methodParam in methodData.Parameters)
             {
                 string inputDataValue;
@@ -59,7 +78,13 @@ namespace ProductFileReader.Common.Utilities
             return parameterValues.Values.ToList();
         }
 
-        //ToDo: Add more supported types.
+        /// <summary>
+        /// Parse input parameter value to a required type.
+        /// ToDo: Add more supported types.
+        /// </summary>
+        /// <param name="type">Type of parameter.</param>
+        /// <param name="inputValue">String input value.</param>
+        /// <returns>Parsed parameter value.</returns>
         private static object ParseParameterValue(Type type, string inputValue)
         {
             var inputType = type.IsGenericType && type.GetGenericTypeDefinition() == typeof (Nullable<>)

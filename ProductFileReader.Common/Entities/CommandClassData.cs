@@ -4,6 +4,9 @@ using System.Reflection;
 
 namespace ProductFileReader.Common.Entities
 {
+    /// <summary>
+    /// CommandClassData class holds the reflected class data of existing commands.
+    /// </summary>
     public class CommandClassData
     {
         public CommandClassData(string name)
