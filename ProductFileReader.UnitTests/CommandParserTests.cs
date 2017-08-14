@@ -21,18 +21,18 @@ namespace ProductFileReader.UnitTests
         [Test]
         public void IsArgumentValueWithTwoEmptyParamsShouldReturnFalse()
         {
-            Type[] parameterTypes = { typeof(string), typeof(string) };
-            object[] parameterValues = {string.Empty, string.Empty};
-            bool result = (bool)_parser.InvokeStatic("IsArgumentValue", parameterTypes, parameterValues);
+            Type[] parameterTypes       = { typeof(string), typeof(string) };
+            object[] parameterValues    = {string.Empty, string.Empty};
+            bool result                 = (bool)_parser.InvokeStatic("IsArgumentValue", parameterTypes, parameterValues);
             result.Should().BeFalse("Both of the parameters are empty");
         }
 
         [Test]
         public void IsArgumentValueWithInvalidParamShouldReturnFalse()
         {
-            Type[] parameterTypes = { typeof(string), typeof(string) };
-            object[] parameterValues = { "<j ", "test" };
-            bool result = (bool)_parser.InvokeStatic("IsArgumentValue", parameterTypes, parameterValues);
+            Type[] parameterTypes       = { typeof(string), typeof(string) };
+            object[] parameterValues    = { "<j ", "test" };
+            bool result                 = (bool)_parser.InvokeStatic("IsArgumentValue", parameterTypes, parameterValues);
             result.Should().BeFalse("InputSplit parameter does not have following bigger than character (>).");
         }
 
@@ -40,8 +40,8 @@ namespace ProductFileReader.UnitTests
         [Test]
         public void IsArgumentValueWithValidParamsShouldReturnTrue()
         {
-            Type[] parameterTypes = { typeof(string), typeof(string) };
-            object[] parameterValues = { "\"12345\"", "test"};
+            Type[] parameterTypes       = { typeof(string), typeof(string) };
+            object[] parameterValues    = { "<12345>", "test"};
             bool result = (bool)_parser.InvokeStatic("IsArgumentValue", parameterTypes, parameterValues);
             result.Should().BeTrue("Both parameters are valid.");
         }
@@ -49,8 +49,8 @@ namespace ProductFileReader.UnitTests
         [Test]
         public void ParseInputDataWithGivenInputTextShouldReturnObjWithTwoArgsAndCorrectMethodName()
         {
-            var cmdInput = "Read File \"test\" SortByStartDate";
-            var result = CommandParser.ParseInputData(cmdInput, "TestClass");
+            var cmdInput    = "Read File <test> SortByStartDate";
+            var result      = CommandParser.ParseInputData(cmdInput, "TestClass");
             result.MethodName.ShouldBeEquivalentTo("Read");
             result.Arguments.Count.Should().Be(2);
         }
@@ -58,8 +58,8 @@ namespace ProductFileReader.UnitTests
         [Test]
         public void ParseInputDataWithGivenInputTextShouldReturnObjWithThreeArgsAndCorrectClassName()
         {
-            var cmdInput = "Read File   \"c:\\test\\text.txt\" SortByStartDate Project \"2\"";
-            var result = CommandParser.ParseInputData(cmdInput, "TestClass");
+            var cmdInput    = "Read File   <c:\\test\\text.txt> SortByStartDate Project <2>";
+            var result      = CommandParser.ParseInputData(cmdInput, "TestClass");
             result.ClassName.ShouldBeEquivalentTo("TestClass");
             result.Arguments.Count.Should().Be(3);
         }
@@ -68,12 +68,12 @@ namespace ProductFileReader.UnitTests
         [Test]
         public void ParseInputDataWithGivenInputTextShouldReturnCorrectArgValues()
         {
-            var cmdInput = "Read File \"c:\\test\\test text.txt\" SortByStartDate Project \"2\"";
-            var result = CommandParser.ParseInputData(cmdInput, "TestClass");
+            var cmdInput    = "Read File <c:\\test\\test text.txt> SortByStartDate Project <2>";
+            var result      = CommandParser.ParseInputData(cmdInput, "TestClass");
             result.Arguments.Count.Should().Be(3);
-            result.Arguments["File"].ShouldBeEquivalentTo("\"c:\\test\\test text.txt\"");
-            result.Arguments["SortByStartDate"].ShouldBeEquivalentTo(string.Empty);
-            result.Arguments["Project"].ShouldBeEquivalentTo("\"2\"");
+            result.Arguments["file"].ShouldBeEquivalentTo("c:\\test\\test text.txt");
+            result.Arguments["sortbystartdate"].ShouldBeEquivalentTo(string.Empty);
+            result.Arguments["project"].ShouldBeEquivalentTo("2");
         }
     }
 }

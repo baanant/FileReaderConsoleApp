@@ -66,6 +66,7 @@
   </Choose>
   <ItemGroup>
     <Compile Include="CommandParserTests.cs" />
+    <Compile Include="FileReaderTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -76,6 +77,15 @@
       <Project>{d7885ae3-f838-4183-83d9-21dbf6b9a84f}</Project>
       <Name>ProductFileReader.Common</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <Content Include="Data\inputFile1.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Data\inputFile2.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
