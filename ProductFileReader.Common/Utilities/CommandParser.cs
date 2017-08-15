@@ -58,8 +58,10 @@ namespace ProductFileReader.Common.Utilities
                         {
                             //Set the argument name.
                             argumentName = split;
-                            if (i == splitted.Count() - 1) result.Arguments.Add(argumentName, string.Empty);
                         }
+
+                        //If last split is not empty add it as an argument.
+                        if (i == splitted.Count() - 1 && !string.IsNullOrEmpty(argumentName)) result.Arguments.Add(argumentName, string.Empty);
                     }
 
                 }
