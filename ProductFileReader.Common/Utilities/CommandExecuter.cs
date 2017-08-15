@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
@@ -27,24 +28,27 @@ namespace ProductFileReader.Common.Utilities
             try
             {
                 var parameterValues = SetParameterValues(classData, inputData);
-                var classType       = assembly.GetType($"{Constants.Commands.CommandNamespace}.{classData.Name}");
+                var classType = assembly.GetType($"{Constants.Commands.CommandNamespace}.{classData.Name}");
                 object[] methodParameterValues = null;
                 if (parameterValues != null && parameterValues.Any())
                 {
                     methodParameterValues = parameterValues.ToArray();
                 }
 
-                return classType.InvokeMember(inputData.MethodName, BindingFlags.InvokeMethod | BindingFlags.Static | BindingFlags.Public, null, null, methodParameterValues).ToString();
+                return
+                    classType.InvokeMember(inputData.MethodName,
+                        BindingFlags.InvokeMethod | BindingFlags.Static | BindingFlags.Public, null, null,
+                        methodParameterValues).ToString();
             }
             catch (InputException ex)
             {
                 throw ex;
             }
-            catch (Exception)
+            catch (TargetInvocationException ex)
             {
-                throw new FatalException(Constants.ErrorMessages.FatalError);
+                if (ex.InnerException != null) throw new InputException(ex.InnerException.Message);
+                throw new FatalException(ex.Message);
             }
-           
         }
 
         /// <summary>

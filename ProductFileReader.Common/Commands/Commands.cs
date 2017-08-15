@@ -32,15 +32,15 @@ namespace ProductFileReader.Common.Commands
                 //Read the .txt file into data columns.
                 var fileDataColumns = FileReader.ReadFileData(file, out noOfValueRows);
                 //Create objects out of input data.
-                var productData = FileDataHandler.DataToObjects<ProductData>(fileDataColumns, noOfValueRows);
+                var productData     = FileDataHandler.DataToObjects<ProductData>(fileDataColumns, noOfValueRows);
 
                 //Filter data.
                 if (project.HasValue)
-                    productData = FileDataHandler.FilterBy(productData, project.Value, pd => pd.Project);
+                    productData     = FileDataHandler.FilterBy(productData, project.Value, pd => pd.Project);
 
                 //Sort data.
                 if (sortbystartdate)
-                    productData = FileDataHandler.SortBy(productData, pd => pd.StartDate, true);
+                    productData     = FileDataHandler.SortBy(productData, pd => pd.StartDate, true);
 
                 return CreateProductDataOutput(productData, fileDataColumns);
 
@@ -48,10 +48,6 @@ namespace ProductFileReader.Common.Commands
             catch (InputException ex)
             {
                 throw ex;
-            }
-            catch (Exception)
-            {
-                throw new FatalException(Constants.ErrorMessages.FatalError);
             }
         }
 
