@@ -58,7 +58,7 @@ namespace ProductFileReader.Common.Utilities
             var parameterValues = new Dictionary<string, object>();
             //Get the command method data.
             var methodData      = classData.CommandMethodData.FirstOrDefault(cmd => cmd.MethodName == inputData.MethodName);
-            if(methodData == null) throw new Exception();
+            if(methodData == null) throw new InputException(string.Format(Constants.ErrorMessages.InvalidCommand, inputData.MethodName));
             if (!methodData.Parameters.Any()) return null;
             //Set the method parameter default values.
             methodData.Parameters.ForEach(mp =>
@@ -97,8 +97,8 @@ namespace ProductFileReader.Common.Utilities
             if (inputType == typeof (int))
             {
                 int numericValue;
-                inputValue = Regex.Match(inputValue, Constants.RegexPatterns.NumericPattern).Value;
-                if (int.TryParse(inputValue, out numericValue))
+                var matchedValue = Regex.Match(inputValue, Constants.RegexPatterns.NumericPattern).Value;
+                if (int.TryParse(matchedValue, out numericValue))
                 {
                     return numericValue;
                 }

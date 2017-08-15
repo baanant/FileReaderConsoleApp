@@ -17,7 +17,7 @@ namespace ProductFileReader.Common.Utilities
     public static class FileDataHandler
     {
 
-        public static IEnumerable<T> DataToObjects<T>(List<FileDataColumn> dataCols, int noOfRows)
+        public static IEnumerable<T> DataToObjects<T>(IEnumerable<FileDataColumn> dataCols, int noOfRows)
         {
             var result                  = new List<T>();
             var productDataProperties   = typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance);
@@ -30,6 +30,7 @@ namespace ProductFileReader.Common.Utilities
                     var propertyType    = prop.PropertyType;
                     var displayName     = prop.GetCustomAttribute<DisplayAttribute>().Name;
                     var dataCol         = dataCols.FirstOrDefault(dc => dc.HeaderTitle == displayName);
+                    if(dataCols.Count() != productDataProperties.Length) throw new InputException(Constants.ErrorMessages.InvalidNumberOfColsInFile);
                     var valueAsString   = dataCol == null ? string.Empty : dataCol.Values[r];
                     try
                     {

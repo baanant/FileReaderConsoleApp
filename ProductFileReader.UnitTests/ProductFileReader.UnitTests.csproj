@@ -65,7 +65,11 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="CommandExecuterTests.cs" />
     <Compile Include="CommandParserTests.cs" />
+    <Compile Include="CommandTests.cs" />
+    <Compile Include="CommandValidatorTests.cs" />
+    <Compile Include="FileDataHandlerTests.cs" />
     <Compile Include="FileReaderTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -86,6 +90,7 @@
     <Content Include="Data\inputFile2.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <None Include="Data\inputFile3.tx" />
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
