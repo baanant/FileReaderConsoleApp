@@ -82,7 +82,7 @@ namespace ProductFileReader.Common.Utilities
                 {
                     return numericValue;
                 }
-                throw new Exception(string.Format(Constants.ErrorMessages.InvalidDataValue, valueAsString, propertyType));
+                throw new Exception(string.Format(Constants.ErrorMessages.InvalidDataValue, valueAsString, propertyType.Name));
             }
             else if (propertyType == typeof(decimal?))
             {
@@ -91,7 +91,7 @@ namespace ProductFileReader.Common.Utilities
                 {
                     return decimalValue;
                 }
-                throw new Exception(string.Format(Constants.ErrorMessages.InvalidDataValue, valueAsString, propertyType));
+                throw new Exception(string.Format(Constants.ErrorMessages.InvalidDataValue, valueAsString, typeof(decimal).Name));
             }
             else if (propertyType == typeof(bool))
             {
@@ -100,7 +100,7 @@ namespace ProductFileReader.Common.Utilities
                 {
                     return boolValue;
                 }
-                throw new Exception(string.Format(Constants.ErrorMessages.InvalidDataValue, valueAsString, propertyType));
+                throw new Exception(string.Format(Constants.ErrorMessages.InvalidDataValue, valueAsString, propertyType.Name));
             }
             else if (propertyType == typeof(DateTime))
             {
@@ -109,7 +109,7 @@ namespace ProductFileReader.Common.Utilities
                 {
                     return dateTimeValue;
                 }
-                throw new Exception(string.Format(Constants.ErrorMessages.InvalidDataValue, valueAsString, propertyType));
+                throw new Exception(string.Format(Constants.ErrorMessages.InvalidDataValue, valueAsString, propertyType.Name));
             }
             else if (propertyType == typeof(ComplexityType))
             {
@@ -118,7 +118,7 @@ namespace ProductFileReader.Common.Utilities
                 {
                     return complexityTypeValue;
                 }
-                throw new Exception(string.Format(Constants.ErrorMessages.InvalidDataValue, valueAsString, propertyType));
+                throw new Exception(string.Format(Constants.ErrorMessages.InvalidDataValue, valueAsString, propertyType.Name));
             }
             return null;
         }

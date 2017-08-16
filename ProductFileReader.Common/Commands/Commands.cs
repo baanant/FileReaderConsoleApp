@@ -40,7 +40,7 @@ namespace ProductFileReader.Common.Commands
 
                 //Sort data.
                 if (sortbystartdate)
-                    productData     = FileDataHandler.SortBy(productData, pd => pd.StartDate, true);
+                    productData     = FileDataHandler.SortBy(productData, pd => pd.StartDate, false);
 
                 return CreateProductDataOutput(productData, fileDataColumns);
 

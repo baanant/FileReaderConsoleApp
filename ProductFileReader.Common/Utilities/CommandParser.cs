@@ -79,7 +79,7 @@ namespace ProductFileReader.Common.Utilities
         /// Remove extra characters from argument value input.
         /// </summary>
         /// <param name="inputSplit"></param>
-        /// <returns>Argument value</returns>
+        /// <returns>Argument value.</returns>
         private static string RemoveExtraChars(string inputSplit)
         {
             var regex = new Regex(Constants.RegexPatterns.ArgumentPattern);
