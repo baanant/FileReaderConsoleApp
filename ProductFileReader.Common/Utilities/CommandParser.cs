@@ -77,14 +77,18 @@ namespace ProductFileReader.Common.Utilities
 
         /// <summary>
         /// Remove extra characters from argument value input.
-        /// Todo: Create a proper Regex.
         /// </summary>
         /// <param name="inputSplit"></param>
         /// <returns>Argument value</returns>
         private static string RemoveExtraChars(string inputSplit)
         {
-            var result = inputSplit.Replace(">", string.Empty).Replace("<", string.Empty).Replace("\\", @"\").Replace("//", "/");
-            return result;
+            var regex = new Regex(Constants.RegexPatterns.ArgumentPattern);
+            var match = regex.Match(inputSplit);
+            if (match.Success && match.Groups.Count > 0)
+            {
+                return match.Groups[1].Value;
+            }
+            return string.Empty;
         }
 
 
